@@ -11,4 +11,4 @@ class RecoursViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         # Chaque user voit seulement ses propres recours
-        return Recours.objects.filter(id_user=self.request.user)
+        return Recours.objects.filter(id=self.request.user.id)

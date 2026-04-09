@@ -10,6 +10,9 @@ urlpatterns = [
     path('', include('apps.users.urls')),
     path('', include('apps.brevets.urls')),
     path('', include('apps.dashboards.urls')),
+    path('', include('apps.recours.urls')),
+    path('', include('apps.paiements.urls')),
+    path('', include('apps.notifications.urls')),
 ]
 
 if settings.DEBUG:
