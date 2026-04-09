@@ -11,11 +11,12 @@ class DashboardCountView(APIView):
 
     def get(self, request):
         user = request.user
-        role = getattr(getattr(user, "id_role", None), "nom_role", "")
-        role = role.strip().lower()
         user_model = get_user_model()
 
-        if role == "agent":
+        def has_group(group_name):
+            return user.groups.filter(name__iexact=group_name).exists()
+
+        if has_group("Agent"):
             data = {
                 "my_demandes": DemandeBrevet.objects.filter(id=user).count(),
                 "my_brevets": Brevet.objects.filter(id=user).count(),
@@ -25,7 +26,7 @@ class DashboardCountView(APIView):
                 ).count(),
             }
 
-        elif role == "responsable":
+        elif has_group("Responsable"):
             data = {
                 "total_demandes": DemandeBrevet.objects.count(),
                 "total_brevets": Brevet.objects.count(),
@@ -34,7 +35,7 @@ class DashboardCountView(APIView):
                 ).count(),
             }
 
-        elif role == "directeur":
+        elif has_group("Directeur"):
             data = {
                 "total_demandes": DemandeBrevet.objects.count(),
                 "total_brevets": Brevet.objects.count(),
@@ -43,7 +44,7 @@ class DashboardCountView(APIView):
                 ).count(),
             }
 
-        elif role == "admin":
+        elif has_group("Admin") or user.is_superuser or user.is_staff:
             data = {
                 "total_users": user_model.objects.count(),
                 "total_demandes": DemandeBrevet.objects.count(),

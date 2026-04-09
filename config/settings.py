@@ -111,7 +111,6 @@ JAZZMIN_SETTINGS = {
     "icons": {
         "auth": "fas fa-users-cog",
         "users.Utilisateur": "fas fa-user",
-        "users.Role": "fas fa-user-tag",
         "brevets": "fas fa-folder",
         "brevets.Brevet": "fas fa-lightbulb",
         "brevets.DemandeBrevet": "fas fa-file-alt",

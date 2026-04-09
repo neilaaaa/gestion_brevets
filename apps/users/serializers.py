@@ -1,20 +1,15 @@
 from rest_framework import serializers
-from .models import Role, Utilisateur
+from .models import Utilisateur
 
-class RoleSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Role
-        fields = '__all__'
-        
 class UtilisateurSerializer(serializers.ModelSerializer):
     class Meta:
         model = Utilisateur
-        fields = ('id', 'username', 'email', 'password', 'date_ajout', 'id_role')
-        read_only_fields = ('date_ajout', 'id_role')
+        fields = ('id', 'username', 'email', 'password', 'date_ajout', 'groups')
+        read_only_fields = ('date_ajout', 'groups')
         extra_kwargs = {
             'password': {'write_only': True}
         }
-        
+
     def create(self, validated_data):
         password = validated_data.pop('password', None)
         user = super().create(validated_data)
@@ -22,7 +17,7 @@ class UtilisateurSerializer(serializers.ModelSerializer):
             user.set_password(password)
             user.save()
         return user
-    
+
     def validate_username(self, value):
         if Utilisateur.objects.filter(username=value).exists():
             raise serializers.ValidationError("Ce nom d'utilisateur existe déjà.")
