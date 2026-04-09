@@ -17,10 +17,9 @@ class TypeDocument(models.Model):
 class Document(models.Model):
     id_document = models.AutoField(primary_key=True)
     nom_document = models.CharField(max_length=255)
-    fichier = models.FileField(upload_to='documents/') 
+    fichier = models.FileField(upload_to='documents/')
     date_ajout = models.DateField(auto_now_add=True)
 
-    # Relations UML
     id_type = models.ForeignKey(TypeDocument, on_delete=models.CASCADE, db_column='id_type')
     id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, db_column='id')
     id_brevet = models.ForeignKey('brevets.Brevet', on_delete=models.CASCADE, null=True, blank=True, db_column='id_brevet')
@@ -31,10 +30,18 @@ class Document(models.Model):
         blank=True,
         db_column='id_demande'
     )
-    id_paiement = models.OneToOneField('paiements.Paiement', on_delete=models.CASCADE, null=True, blank=True, db_column='id_paiement')
+    id_paiement = models.OneToOneField(
+        'paiements.Paiement',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        db_column='id_paiement'
+    )
+
     class Meta:
         verbose_name = "Document"
         verbose_name_plural = "Documents"
+
     def clean(self):
         if not self.id_demande and not self.id_brevet:
             raise ValidationError("Un document doit être obligatoirement lié à une Demande de Brevet ou à un Brevet.")

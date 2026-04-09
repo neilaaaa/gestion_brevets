@@ -11,6 +11,9 @@ class DocumentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         # Chaque user voit seulement ses propres documents
         return Document.objects.filter(id=self.request.user)
+    def perform_create(self, serializer):
+        # Quand on fait un POST, le document est automatiquement lié à l’utilisateur connecté
+        serializer.save(id=self.request.user)
 
 class TypeDocumentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]

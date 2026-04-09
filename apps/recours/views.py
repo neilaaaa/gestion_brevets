@@ -11,4 +11,8 @@ class RecoursViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         # Chaque user voit seulement ses propres recours
-        return Recours.objects.filter(id=self.request.user.id)
+        return Recours.objects.filter(id=self.request.user)
+    
+    def perform_create(self, serializer):
+        # Quand on fait un POST, le recours est lié à l’utilisateur connecté
+        serializer.save(id=self.request.user)

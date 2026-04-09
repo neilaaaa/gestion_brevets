@@ -9,18 +9,18 @@ class RoleSerializer(serializers.ModelSerializer):
 class UtilisateurSerializer(serializers.ModelSerializer):
     class Meta:
         model = Utilisateur
-        fields = 'id','date_ajout', 'id_role'
-        read_only_fields = 'date_ajout', 'id_role'
+        fields = ('id', 'username', 'email', 'password', 'date_ajout', 'id_role')
+        read_only_fields = ('date_ajout', 'id_role')
         extra_kwargs = {
-       'password': {'write_only': True}
-        } #cache le password dans les réponses de l'API et aussi pour éviter les erreurs de validation lors de la création d'un utilisateur avec un mot de passe haché déjà existant dans la base de données.
+            'password': {'write_only': True}
+        }
         
     def create(self, validated_data):
-        password = validated_data.pop('password', None) #récupère le mot de passe brut du validated_data et le supprime du dictionnaire pour éviter les erreurs de validation lors de la création d'un utilisateur avec un mot de passe haché déjà existant dans la base de données.
-        user = super().create(validated_data) #crée l'utilisateur sans le mot de passe
+        password = validated_data.pop('password', None)
+        user = super().create(validated_data)
         if password:
-            user.set_password(password) #hachage du mot de passe brut avant de le stocker dans la base de données
-            user.save() #sauvegarde l'utilisateur avec le mot de passe haché
+            user.set_password(password)
+            user.save()
         return user
     
     def validate_username(self, value):
