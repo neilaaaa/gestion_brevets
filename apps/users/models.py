@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
+
 class Utilisateur(AbstractUser):
     date_ajout = models.DateField(auto_now_add=True, null=True, blank=True)
 

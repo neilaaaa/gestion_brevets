@@ -14,7 +14,7 @@ class DashboardCountView(APIView):
         user_model = get_user_model()
 
         def has_group(group_name):
-            return user.groups.filter(name__iexact=group_name).exists()
+            return user.groups.filter(name=group_name).exists()
 
         if has_group("Agent"):
             data = {
@@ -44,7 +44,7 @@ class DashboardCountView(APIView):
                 ).count(),
             }
 
-        elif has_group("Admin") or user.is_superuser or user.is_staff:
+        elif user.is_staff or user.is_superuser:
             data = {
                 "total_users": user_model.objects.count(),
                 "total_demandes": DemandeBrevet.objects.count(),
