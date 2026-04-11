@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import DemandeBrevet, Deposant, Inventeur, Brevet
 
+
 class DemandeBrevetSerializer(serializers.ModelSerializer):
     class Meta:
         model = DemandeBrevet
@@ -38,15 +39,17 @@ class BrevetSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brevet
         fields = '__all__'
+        extra_kwargs = {
+            'id': {'read_only': True},
+        }
 
     def validate(self, attrs):
         date_depo = attrs.get("date_depo")
         date_sortie = attrs.get("date_sortie")
 
-        if date_depo and date_sortie:
-            if date_sortie < date_depo:
-                raise serializers.ValidationError(
-                    "La date de sortie ne peut pas être antérieure à la date de dépôt."
-                )
+        if date_depo and date_sortie and date_sortie < date_depo:
+            raise serializers.ValidationError(
+                "La date de sortie ne peut pas etre anterieure a la date de depot."
+            )
 
         return attrs

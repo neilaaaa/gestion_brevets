@@ -1,10 +1,12 @@
 from rest_framework import serializers
 from .models import TypeDocument, Document
 
+
 class TypeDocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = TypeDocument
         fields = '__all__'
+
 
 class DocumentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -25,7 +27,7 @@ class DocumentSerializer(serializers.ModelSerializer):
 
         if not id_demande and not id_brevet:
             raise serializers.ValidationError(
-                "Le document doit être lié à une DemandeBrevet ou à un Brevet."
+                "Le document doit etre lie a une DemandeBrevet ou a un Brevet."
             )
 
         return attrs

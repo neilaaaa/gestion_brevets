@@ -67,7 +67,7 @@ class Brevet(models.Model):
     date_depo = models.DateField()
     date_sortie = models.DateField()
     titulaire = models.CharField(max_length=255)
-    statut = models.CharField(max_length=20, choices=STATUT_CHOICES)
+    statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='EN_ATTENTE')
 
     id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, db_column='id', related_name='brevets_crees')
     id_demande = models.OneToOneField(DemandeBrevet, on_delete=models.CASCADE, null=True, blank=True, db_column='id_demande')

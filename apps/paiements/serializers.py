@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Paiement
 
+
 class PaiementSerializer(serializers.ModelSerializer):
     class Meta:
         model = Paiement
@@ -12,6 +13,6 @@ class PaiementSerializer(serializers.ModelSerializer):
     def validate_montant_total(self, value):
         if value <= 0:
             raise serializers.ValidationError(
-                "Le montant total doit être strictement positif."
+                "Le montant total doit etre strictement positif."
             )
         return value

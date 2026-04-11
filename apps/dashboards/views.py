@@ -54,7 +54,7 @@ class DashboardCountView(APIView):
 
         else:
             data = {
-                "message": "Aucune statistique disponible pour ce rôle."
+                "message": "Aucune statistique disponible pour ce role."
             }
 
         return Response(data)

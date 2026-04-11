@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
 
-# --- TypeDocument ---
+
 class TypeDocument(models.Model):
     id_type = models.AutoField(primary_key=True)
     nom_type = models.CharField(max_length=100)
@@ -13,7 +13,7 @@ class TypeDocument(models.Model):
     def __str__(self):
         return self.nom_type
 
-# --- Document ---
+
 class Document(models.Model):
     id_document = models.AutoField(primary_key=True)
     nom_document = models.CharField(max_length=255)
@@ -44,7 +44,9 @@ class Document(models.Model):
 
     def clean(self):
         if not self.id_demande and not self.id_brevet:
-            raise ValidationError("Un document doit être obligatoirement lié à une Demande de Brevet ou à un Brevet.")
+            raise ValidationError(
+                "Un document doit etre obligatoirement lie a une Demande de Brevet ou a un Brevet."
+            )
 
     def __str__(self):
         return self.nom_document
