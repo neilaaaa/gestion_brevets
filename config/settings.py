@@ -88,62 +88,25 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'users.Utilisateur'
-
-JAZZMIN_SETTINGS = {
-    "site_title": "Gestion des Brevets",
-    "site_header": "Administration Brevets",
-    "site_brand": "Gestion des Brevets",
-    "site_logo": "images/logo-sonatrach.jpg",
-    "theme": "darkly",
-    "default_theme_mode": "dark",
-    "show_ui_builder": False,
-    "navigation_expanded": True,
-    "order_with_respect_to": [
-        "dashboard",
-        "brevets",
-        "inventeurs",
-        "deposants",
-        "documents",
-        "paiements",
-        "recours",
-        "notifications",
-        "users",
-        "auth",
-    ],
-    "icons": {
-        "auth": "fas fa-users-cog",
-        "users.Utilisateur": "fas fa-user",
-        "brevets": "fas fa-folder",
-        "brevets.Brevet": "fas fa-lightbulb",
-        "brevets.DemandeBrevet": "fas fa-file-alt",
-        "inventeurs.Inventeur": "fas fa-user-astronaut",
-        "deposants.Deposant": "fas fa-user-tie",
-        "documents": "fas fa-folder-open",
-        "documents.Document": "fas fa-file",
-        "documents.TypeDocument": "fas fa-file-medical",
-        "paiements": "fas fa-credit-card",
-        "paiements.Paiement": "fas fa-money-bill-wave",
-        "notifications": "fas fa-bell",
-        "notifications.Notification": "fas fa-bell",
-        "recours": "fas fa-balance-scale",
-        "recours.Recours": "fas fa-gavel",
-        "dashboard": "fas fa-chart-line",
-    }
-}
-
-JAZZMIN_UI_TWEAKS = {
-    "navbar": "navbar-dark",
-    "brand_colour": "navbar-primary",
-    "accent": "accent-info",
-    "sidebar": "sidebar-dark-primary",
-    "sidebar_nav_small_text": False,
-    "sidebar_disable_expand": False,
-    "dark_mode_theme": "darkly",
-}
-
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
@@ -151,8 +114,20 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '10/min',
+    },
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
 }
+
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5174",
 ]
+
