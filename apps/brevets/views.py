@@ -133,7 +133,7 @@ class BrevetViewSet(viewsets.ModelViewSet):
         if user.groups.filter(name="Directeur").exists():
             return Brevet.objects.all()
 
-        return Brevet.objects.filter(id=user)
+        return Brevet.objects.filter(user=user)
 
     def _can_manage_brevet(self, user):
         return (

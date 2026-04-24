@@ -71,6 +71,8 @@ class Brevet(models.Model):
 
     id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, db_column='id', related_name='brevets_crees')
     id_demande = models.OneToOneField(DemandeBrevet, on_delete=models.CASCADE, null=True, blank=True, db_column='id_demande')
+    id_inv = models.ManyToManyField(Inventeur, related_name='inventeur')
+    id_dep = models.ForeignKey(Deposant, on_delete=models.CASCADE, db_column='id_deposant', null=True)
 
     def __str__(self):
         return self.titre

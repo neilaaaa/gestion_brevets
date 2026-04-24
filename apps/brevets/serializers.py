@@ -36,11 +36,15 @@ class InventeurSerializer(serializers.ModelSerializer):
 
 
 class BrevetSerializer(serializers.ModelSerializer):
+    id_inv= InventeurSerializer(many=True, read_only=True)
+    id_dep = DeposantSerializer(read_only=True)
     class Meta:
         model = Brevet
         fields = '__all__'
         extra_kwargs = {
+            'id_brevet': {'read_only': True},
             'id': {'read_only': True},
+            'user':{'read_only': True},
         }
 
     def validate(self, attrs):

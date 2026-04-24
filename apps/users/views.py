@@ -8,7 +8,6 @@ from rest_framework.authtoken.models import Token
 from .models import Utilisateur
 from .serializers import UtilisateurSerializer
 
-
 class UtilisateurViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminUser]
     queryset = Utilisateur.objects.all()

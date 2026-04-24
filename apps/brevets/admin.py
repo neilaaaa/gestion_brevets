@@ -58,7 +58,7 @@ class DemandeBrevetAdmin(admin.ModelAdmin):
 
 @admin.register(Brevet)
 class BrevetAdmin(admin.ModelAdmin):
-    list_display = ('id_brevet', 'num_brevet', 'titre', 'statut', 'date_sortie', 'titulaire', 'id_demande')
+    list_display = ('id_brevet', 'num_brevet', 'titre', 'statut', 'date_sortie', 'titulaire', 'id_demande' )
     list_filter = ('statut', 'date_sortie')
     search_fields = ('titre', 'num_brevet', 'titulaire')
     ordering = ('-date_sortie',)
