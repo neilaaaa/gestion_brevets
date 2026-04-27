@@ -4,8 +4,8 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .models import Document, TypeDocument
-from .serializers import DocumentSerializer, TypeDocumentSerializer
+from .models import Document
+from .serializers import DocumentSerializer
 
 
 class DocumentViewSet(viewsets.ModelViewSet):
@@ -82,8 +82,3 @@ class DocumentViewSet(viewsets.ModelViewSet):
             filename=document.fichier.name.split("/")[-1]
         )
 
-
-class TypeDocumentViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
-    queryset = TypeDocument.objects.all()
-    serializer_class = TypeDocumentSerializer

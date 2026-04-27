@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import DemandeBrevet, Deposant, Inventeur, Brevet
-
+from apps.documents.serializers import DocumentSerializer
 
 class DemandeBrevetSerializer(serializers.ModelSerializer):
     class Meta:
@@ -36,8 +36,10 @@ class InventeurSerializer(serializers.ModelSerializer):
 
 
 class BrevetSerializer(serializers.ModelSerializer):
+    documents = DocumentSerializer(source="document_set", many=True, read_only = True)
     id_inv= InventeurSerializer(many=True, read_only=True)
     id_dep = DeposantSerializer(read_only=True)
+    
     class Meta:
         model = Brevet
         fields = '__all__'
