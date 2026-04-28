@@ -15,9 +15,9 @@ class DemandeBrevet(models.Model):
     date_CA = models.DateField()
     mandataire = models.CharField(max_length=255)
     date_pouvoir = models.DateField()
-    prepose_reception = models.CharField(max_length=255)
-    lieu_reception = models.CharField(max_length=255)
-    date_reception = models.DateField()
+    prepose_reception = models.CharField(max_length=255, blank=True, default="")
+    lieu_reception = models.CharField(max_length=255, blank=True, default="")
+    date_reception = models.DateField(null=True, blank=True)
     autre_info = models.TextField(blank=True)
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='non_valider')
 
