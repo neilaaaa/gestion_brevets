@@ -8,8 +8,15 @@ class DeposantSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class InventeurSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Inventeur
+        fields = '__all__'
+
+
 class DemandeBrevetSerializer(serializers.ModelSerializer):
     deposant = DeposantSerializer(source="deposant_set", read_only=True, many=True)
+    inventeur = InventeurSerializer(source="inventeur_set", read_only=True, many=True)
     class Meta:
         model = DemandeBrevet
         fields = '__all__'
@@ -28,18 +35,6 @@ class DemandeBrevetSerializer(serializers.ModelSerializer):
             )
 
         return attrs
-
-
-class DeposantSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Deposant
-        fields = ['nom_dep', 'prenom_dep', 'denomination', 'adresse_dep', 'nationalite', 'id_demande']
-
-
-class InventeurSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Inventeur
-        fields = '__all__'
 
 
 class BrevetSerializer(serializers.ModelSerializer):
