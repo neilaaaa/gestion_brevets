@@ -1,6 +1,28 @@
 from django.db import models
 from django.conf import settings
 
+# --- Brevet ---
+class Brevet(models.Model):
+    STATUT_CHOICES = [
+        ('ACCEPTER', 'ACCEPTER'),
+        ('REFUSER', 'REFUSER'),
+        ('EN_ATTENTE', 'EN_ATTENTE'),
+    ]
+
+    id_brevet = models.AutoField(primary_key=True)
+    num_brevet = models.IntegerField()
+    titre = models.CharField(max_length=1000)
+    num_depo = models.IntegerField()
+    date_depo = models.DateField()
+    date_sortie = models.DateField()
+    titulaire = models.CharField(max_length=255)
+    statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='EN_ATTENTE')
+
+    id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, db_column='id', related_name='brevets_crees')
+
+    def __str__(self):
+        return self.titre
+
 # --- DemandeBrevet (Must be above classes that reference it) ---
 class DemandeBrevet(models.Model):
     STATUT_CHOICES = [('valider', 'valider'), ('non_valider', 'non_valider')]
@@ -22,6 +44,7 @@ class DemandeBrevet(models.Model):
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='non_valider')
 
     id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, db_column='id', related_name='demandes')
+    id_brevet = models.OneToOneField(Brevet, on_delete=models.SET_NULL, null=True, blank=True, db_column='id_brevet',  related_name="demande")
 
     def __str__(self):
         return f"{self.id_demande} - {self.titre}"
@@ -47,32 +70,7 @@ class Inventeur(models.Model):
     prenom_inv = models.CharField(max_length=100)
     adress_inv = models.CharField(max_length=255)
 
-    id_demande = models.ManyToManyField(DemandeBrevet, related_name='inventeurs') #manyToManyField au lieu de ForeignKey
+    id_demande = models.ForeignKey(DemandeBrevet, related_name='inventeurs', on_delete=models.CASCADE, null=True) #manyToManyField au lieu de ForeignKey
 
     def __str__(self):
         return f"{self.nom_inv} {self.prenom_inv}"
-
-# --- Brevet ---
-class Brevet(models.Model):
-    STATUT_CHOICES = [
-        ('ACCEPTER', 'ACCEPTER'),
-        ('REFUSER', 'REFUSER'),
-        ('EN_ATTENTE', 'EN_ATTENTE'),
-    ]
-
-    id_brevet = models.AutoField(primary_key=True)
-    num_brevet = models.IntegerField()
-    titre = models.CharField(max_length=1000)
-    num_depo = models.IntegerField()
-    date_depo = models.DateField()
-    date_sortie = models.DateField()
-    titulaire = models.CharField(max_length=255)
-    statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='EN_ATTENTE')
-
-    id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, db_column='id', related_name='brevets_crees')
-    id_demande = models.OneToOneField(DemandeBrevet, on_delete=models.CASCADE, null=True, blank=True, db_column='id_demande')
-    id_inv = models.ManyToManyField(Inventeur, related_name='inventeur')
-    id_dep = models.ForeignKey(Deposant, on_delete=models.CASCADE, db_column='id_deposant', null=True)
-
-    def __str__(self):
-        return self.titre

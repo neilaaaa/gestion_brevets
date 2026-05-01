@@ -9,7 +9,7 @@ class DeposantInline(admin.StackedInline):
 
 
 class InventeurInline(admin.TabularInline):
-    model = Inventeur.id_demande.through
+    model = Inventeur
     extra = 1
     verbose_name = "Inventeur"
     verbose_name_plural = "Inventeurs"
@@ -35,7 +35,7 @@ class InventeurAdmin(admin.ModelAdmin):
 
 @admin.register(DemandeBrevet)
 class DemandeBrevetAdmin(admin.ModelAdmin):
-    list_display = ('id_demande', 'titre', 'statut', 'num_depo')
+    list_display = ('id_demande', 'titre', 'statut', 'num_depo', 'id_brevet')
     list_filter = ('statut', 'date_depo', 'pays_origine')
     search_fields = ('titre', 'id_demande', 'num_depo')
     inlines = [DeposantInline, InventeurInline]
@@ -58,7 +58,7 @@ class DemandeBrevetAdmin(admin.ModelAdmin):
 
 @admin.register(Brevet)
 class BrevetAdmin(admin.ModelAdmin):
-    list_display = ('id_brevet', 'num_brevet', 'titre', 'statut', 'date_sortie', 'titulaire', 'id_demande' )
+    list_display = ('id_brevet', 'num_brevet', 'titre', 'statut', 'date_sortie', 'titulaire' )
     list_filter = ('statut', 'date_sortie')
     search_fields = ('titre', 'num_brevet', 'titulaire')
     ordering = ('-date_sortie',)
