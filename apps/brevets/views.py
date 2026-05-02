@@ -12,6 +12,11 @@ from .serializers import (
     InventeurSerializer,
 )
 
+
+def has_group(user, name):
+    return user.groups.filter(name__iexact=name).exists()
+
+
 class DemandeBrevetViewSet(viewsets.ModelViewSet):
     queryset = DemandeBrevet.objects.all()
     permission_classes = [IsAuthenticated]
@@ -23,10 +28,10 @@ class DemandeBrevetViewSet(viewsets.ModelViewSet):
         if user.is_staff or user.is_superuser:
             return DemandeBrevet.objects.all()
 
-        if user.groups.filter(name="Responsable").exists():
+        if has_group(user, "responsable"):
             return DemandeBrevet.objects.all()
 
-        if user.groups.filter(name="Directeur").exists():
+        if has_group(user, "directeur"):
             return DemandeBrevet.objects.all()
 
         return DemandeBrevet.objects.filter(id=user)
@@ -40,7 +45,7 @@ class DemandeBrevetViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def valider_demande(self, request, pk=None):
-        if not request.user.groups.filter(name="Responsable").exists():
+        if not has_group(request.user, "responsable"):
             return Response(
                 {"error": "Vous n'avez pas la permission de valider une demande."},
                 status=status.HTTP_403_FORBIDDEN
@@ -59,7 +64,7 @@ class DemandeBrevetViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def refuser_demande(self, request, pk=None):
-        if not request.user.groups.filter(name="Responsable").exists():
+        if not has_group(request.user, "responsable"):
             return Response(
                 {"error": "Vous n'avez pas la permission de refuser une demande."},
                 status=status.HTTP_403_FORBIDDEN
@@ -88,10 +93,10 @@ class DeposantViewSet(viewsets.ModelViewSet):
         if user.is_staff or user.is_superuser:
             return Deposant.objects.all()
 
-        if user.groups.filter(name="Responsable").exists():
+        if has_group(user, "responsable"):
             return Deposant.objects.all()
 
-        if user.groups.filter(name="Directeur").exists():
+        if has_group(user, "directeur"):
             return Deposant.objects.all()
 
         return Deposant.objects.filter(id_demande__id=user)
@@ -107,10 +112,10 @@ class InventeurViewSet(viewsets.ModelViewSet):
         if user.is_staff or user.is_superuser:
             return Inventeur.objects.all()
 
-        if user.groups.filter(name="Responsable").exists():
+        if has_group(user, "responsable"):
             return Inventeur.objects.all()
 
-        if user.groups.filter(name="Directeur").exists():
+        if has_group(user, "directeur"):
             return Inventeur.objects.all()
 
         return Inventeur.objects.filter(id_demande__id=user).distinct()
@@ -127,10 +132,10 @@ class BrevetViewSet(viewsets.ModelViewSet):
         if user.is_staff or user.is_superuser:
             return Brevet.objects.all()
 
-        if user.groups.filter(name="Responsable").exists():
+        if has_group(user, "responsable"):
             return Brevet.objects.all()
 
-        if user.groups.filter(name="Directeur").exists():
+        if has_group(user, "directeur"):
             return Brevet.objects.all()
 
         return Brevet.objects.filter(id=user)
@@ -139,7 +144,7 @@ class BrevetViewSet(viewsets.ModelViewSet):
         return (
             user.is_staff
             or user.is_superuser
-            or user.groups.filter(name="Agent").exists()
+            or has_group(user, "agent")
         )
 
     def create(self, request, *args, **kwargs):

@@ -3,20 +3,53 @@ from rest_framework import serializers
 from .models import Utilisateur
 
 
+class GroupNamesField(serializers.Field):
+    def to_representation(self, value):
+        return list(value.values_list('name', flat=True))
+
+    def to_internal_value(self, data):
+        if data is None:
+            return []
+        if not isinstance(data, list):
+            raise serializers.ValidationError("Le role doit etre une liste.")
+
+        normalized = []
+        for group_name in data:
+            cleaned = str(group_name).strip().lower()
+            if cleaned and cleaned not in normalized:
+                normalized.append(cleaned)
+        return normalized
+
+
 class UtilisateurSerializer(serializers.ModelSerializer):
-    groups = serializers.SlugRelatedField(
-        many=True,
-        slug_field='name',
-        queryset=Group.objects.all()
-    )
+    groups = GroupNamesField(required=False)
 
     class Meta:
         model = Utilisateur
-        fields = ('id', 'username', 'email', 'password', 'date_ajout', 'groups')
+        fields = (
+            'id',
+            'username',
+            'email',
+            'password',
+            'date_ajout',
+            'groups',
+            'is_staff',
+            'is_superuser',
+            'is_active',
+        )
         read_only_fields = ('date_ajout',)
         extra_kwargs = {
             'password': {'write_only': True, 'required': False}
         }
+
+    def _resolve_groups(self, groups):
+        resolved = []
+        for group_name in groups:
+            group = Group.objects.filter(name__iexact=group_name).first()
+            if group is None:
+                group = Group.objects.create(name=group_name)
+            resolved.append(group)
+        return resolved
 
     def create(self, validated_data):
         groups = validated_data.pop('groups', [])
@@ -29,7 +62,7 @@ class UtilisateurSerializer(serializers.ModelSerializer):
             user.save()
 
         if groups:
-            user.groups.set(groups)
+            user.groups.set(self._resolve_groups(groups))
 
         return user
 
@@ -46,7 +79,7 @@ class UtilisateurSerializer(serializers.ModelSerializer):
         instance.save()
 
         if groups is not None:
-            instance.groups.set(groups)
+            instance.groups.set(self._resolve_groups(groups))
 
         return instance
 
