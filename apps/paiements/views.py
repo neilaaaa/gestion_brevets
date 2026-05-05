@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 
 class PaiementViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
-    queryset = Paiement.objects.all()
+    queryset = Paiement.objects.all().order_by('id_paiement')
     serializer_class = PaiementSerializer
 
     def get_queryset(self):

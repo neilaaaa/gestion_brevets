@@ -5,6 +5,8 @@ from rest_framework.response import Response
 
 from apps.notifications.models import Notifications
 from .models import Brevet, DemandeBrevet, Deposant, Inventeur
+from django.conf import settings
+from apps.users.models import Utilisateur
 from .serializers import (
     BrevetSerializer,
     DemandeBrevetSerializer,
@@ -121,25 +123,29 @@ class BrevetViewSet(viewsets.ModelViewSet):
     queryset = Brevet.objects.all()
     serializer_class = BrevetSerializer
 
+
     def get_queryset(self):
         user = self.request.user
 
         if user.is_staff or user.is_superuser:
             return Brevet.objects.all()
 
-        if user.groups.filter(name="Responsable").exists():
+        if user.groups.filter(name="responsable").exists():
             return Brevet.objects.all()
 
-        if user.groups.filter(name="Directeur").exists():
+        if user.groups.filter(name="directeur").exists():
+            return Brevet.objects.all()
+        
+        if user.groups.filter(name="agent").exists():
             return Brevet.objects.all()
 
-        return Brevet.objects.filter(id=user)
+        return Brevet.objects.filter(id_id=user)
 
     def _can_manage_brevet(self, user):
         return (
             user.is_staff
             or user.is_superuser
-            or user.groups.filter(name="Agent").exists()
+            or user.groups.filter(name="agent").exists()
         )
 
     def create(self, request, *args, **kwargs):
@@ -180,9 +186,14 @@ class BrevetViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         brevet = serializer.save(id=self.request.user)
-
-        if brevet.id_demande:
+    try:
+        user = serializer.save()
+        group = Group.objects.get(name="Agent")
+        user.groups.add(group)
+        if brevet.demande:
             Notifications.objects.create(
-                id=brevet.id_demande.id,
+                id=brevet.demande.id_demande,
                 message=f"Un brevet a ete ajoute manuellement pour votre demande '{brevet.id_demande.titre}'."
             )
+    except Exception:
+        pass

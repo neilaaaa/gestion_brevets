@@ -4,6 +4,17 @@ from .models import  Document
 
 
 class DocumentSerializer(serializers.ModelSerializer):
+    brevet = serializers.SerializerMethodField()
+    
+    def get_brevet(self, obj):
+        try:
+            return{
+                "titre": obj.id_brevet.titre,
+                "num_brevet": obj.id_brevet.num_brevet
+            }
+        except:
+            return None
+        
     class Meta:
         model = Document
         fields = '__all__'

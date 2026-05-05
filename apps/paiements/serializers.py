@@ -3,6 +3,17 @@ from .models import Paiement
 
 
 class PaiementSerializer(serializers.ModelSerializer):
+    brevet = serializers.SerializerMethodField()
+
+    def get_brevet(self, obj):
+        try:
+            return{
+                "titre": obj.id_brevet.titre,
+                "num_brevet": obj.id_brevet.num_brevet
+            }
+        except:
+            return None
+        
     class Meta:
         model = Paiement
         fields = '__all__'

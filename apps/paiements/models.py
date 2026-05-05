@@ -12,8 +12,8 @@ class Paiement(models.Model):
     montant_total = models.FloatField()
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='non_payer')
 
-    # Relations UML
-    id_brevet = models.OneToOneField('brevets.Brevet', on_delete=models.CASCADE, db_column='id_brevet')
+
+    id_brevet = models.OneToOneField('brevets.Brevet', on_delete=models.CASCADE, db_column='id_brevet', null=True, blank=True, related_name="paiement")
     id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, db_column='id')
 
     def __str__(self):

@@ -42,7 +42,7 @@ class RecoursViewSet(viewsets.ModelViewSet):
                 from apps.brevets.models import Brevet
                 allowed_brevet = Brevet.objects.filter(
                     id_brevet=id_brevet,
-                    id_demande__id=user
+                    id_id=user
                 ).exists()
 
                 if not allowed_brevet:

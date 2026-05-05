@@ -11,12 +11,12 @@ class Recours(models.Model):
     id_recours = models.AutoField(primary_key=True)
     date_depot = models.DateField(auto_now_add=True)
     motif = models.CharField(max_length=255)
-    description = models.TextField()
+    description = models.TextField(null=True, blank=True)
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='EN_COURS')
     date_traitement = models.DateField(null=True, blank=True)
 
     # Relations UML
-    id_brevet = models.ForeignKey('brevets.Brevet', on_delete=models.CASCADE, db_column='id_brevet')
+    id_brevet = models.ForeignKey('brevets.Brevet', on_delete=models.CASCADE, db_column='id_brevet', null=True, blank=True)
     id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, db_column='id')
 
     def __str__(self):

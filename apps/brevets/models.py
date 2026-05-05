@@ -14,7 +14,7 @@ class Brevet(models.Model):
     titre = models.CharField(max_length=1000)
     num_depo = models.IntegerField()
     date_depo = models.DateField()
-    date_sortie = models.DateField()
+    date_sortie = models.DateField(null=True, blank=True)
     titulaire = models.CharField(max_length=255)
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='EN_ATTENTE')
 

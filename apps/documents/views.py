@@ -29,14 +29,14 @@ class DocumentViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         user = request.user
-        id_demande = request.data.get("id_demande")
+        id_demande = request.data.get("demande")
         id_brevet = request.data.get("id_brevet")
 
         if not (
             user.is_staff
             or user.is_superuser
-            or user.groups.filter(name="Responsable").exists()
-            or user.groups.filter(name="Directeur").exists()
+            or user.groups.filter(name="responsable").exists()
+            or user.groups.filter(name="directeur").exists()
         ):
             if id_demande:
                 from apps.brevets.models import DemandeBrevet
@@ -55,7 +55,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
                 from apps.brevets.models import Brevet
                 allowed_brevet = Brevet.objects.filter(
                     id_brevet=id_brevet,
-                    id_demande__id=user
+                    id_id=user
                 ).exists()
 
                 if not allowed_brevet:
@@ -68,6 +68,34 @@ class DocumentViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(id=self.request.user)
+        print("DATA reçue:", self.request.data)
+        document = serializer.save()
+        
+        if document.type_document == "brevet" and document.id_brevet:
+            document.id_brevet.statut = "ACCEPTER"
+            if document. date_sortie_officielle: 
+             document.id_brevet.date_sortie = document. date_sortie_officielle
+            document.id_brevet.save()
+            
+        if document.type_document == "paiement" and document.id_brevet:
+            try:
+             paiement = document.id_brevet.paiement
+             paiement.statut = "payer"
+             paiement.save()
+            except:
+                pass
+            
+    def perform_update(self, serializer):
+        document = serializer.save()
+        if document.type_document == "brevet" and document.id_brevet:
+            document.id_brevet.statut = "ACCEPTER"
+            if document. date_sortie_officielle: 
+             document.id_brevet.date_sortie = document. date_sortie_officielle
+            document.id_brevet.save()
+            
+        if document.type_document == "paiement" and document.id_paiement:
+             document.id_paiement.statut = "payer"
+             document.id_paiement.save()
 
     @action(detail=True, methods=['get'])
     def download(self, request, pk=None):

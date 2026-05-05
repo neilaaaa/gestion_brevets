@@ -6,20 +6,26 @@ from django.core.exceptions import ValidationError
 class Document(models.Model):
     TYPE_CHOICES = [
         ("brevet",   "Brevet"),
+        ("Memoire Descriptif", "memoire descriptif"),
         ("demande",  "Demande"),
         ("recours",  "Recours"),
         ("paiement", "Paiement"),
-    ]
+        ("autre", "Autre"),
+        ("autre_type", "Autre Type")
+        ]
     id_document = models.AutoField(primary_key=True)
     nom_document = models.CharField(max_length=255)
+    description = models.TextField(default="", blank=True)
     fichier = models.FileField(upload_to='documents/')
     date_ajout = models.DateField(auto_now_add=True)
+    date_sortie_officielle = models.DateField(auto_now_add=True, null=True, blank=True)
 
     type_document = models.CharField(  # ← plus besoin de ForeignKey
         max_length=50,
         choices=TYPE_CHOICES,
         default="brevet"
     )
+    autre_type = models.CharField(max_length=100, blank=True, default="")
     
     id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, db_column='id')
     id_brevet = models.ForeignKey('brevets.Brevet', on_delete=models.CASCADE, null=True, blank=True, db_column='id_brevet')

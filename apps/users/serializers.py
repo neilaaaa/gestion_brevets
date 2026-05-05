@@ -12,7 +12,7 @@ class UtilisateurSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Utilisateur
-        fields = ('id', 'username', 'email', 'password', 'date_ajout', 'groups')
+        fields = ('id', 'username', 'email', 'password', 'date_ajout', 'groups', 'is_active')
         read_only_fields = ('date_ajout',)
         extra_kwargs = {
             'password': {'write_only': True, 'required': False}
@@ -36,6 +36,7 @@ class UtilisateurSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         groups = validated_data.pop('groups', None)
         password = validated_data.pop('password', None)
+        instance.is_active = validated_data.get('is_active', instance.is_active)
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)

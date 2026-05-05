@@ -26,11 +26,13 @@ class DeposantAdmin(admin.ModelAdmin):
 class InventeurAdmin(admin.ModelAdmin):
     list_display = ('id_inv', 'nom_inv', 'prenom_inv', 'get_demandes')
     search_fields = ('nom_inv', 'prenom_inv', 'id_inv')
-    list_filter = ('id_demande__titre',)
+    list_filter = ('id_demande',)
 
-    @admin.display(description='Demandes')
+    @admin.display(description='Demande')
     def get_demandes(self, obj):
-        return ", ".join([str(d.titre) for d in obj.id_demande.all()])
+       if obj.id_demande:
+         return str(obj.id_demande.titre)
+       return "Aucune demande"
 
 
 @admin.register(DemandeBrevet)
@@ -58,7 +60,7 @@ class DemandeBrevetAdmin(admin.ModelAdmin):
 
 @admin.register(Brevet)
 class BrevetAdmin(admin.ModelAdmin):
-    list_display = ('id_brevet', 'num_brevet', 'titre', 'statut', 'date_sortie', 'titulaire' )
+    list_display = ('id_brevet', 'num_brevet', 'titre', 'statut', 'date_sortie', 'titulaire')
     list_filter = ('statut', 'date_sortie')
     search_fields = ('titre', 'num_brevet', 'titulaire')
     ordering = ('-date_sortie',)
