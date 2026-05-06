@@ -20,10 +20,10 @@ class RecoursViewSet(viewsets.ModelViewSet):
         if user.is_staff or user.is_superuser:
             return Recours.objects.all()
 
-        if user.groups.filter(name="Responsable").exists():
+        if user.groups.filter(name="responsable").exists():
             return Recours.objects.all()
 
-        if user.groups.filter(name="Directeur").exists():
+        if user.groups.filter(name="directeur").exists():
             return Recours.objects.all()
 
         return Recours.objects.filter(id=user)
