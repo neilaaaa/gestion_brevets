@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import DemandeBrevet, Deposant, Inventeur, Brevet
 from apps.documents.serializers import DocumentSerializer
+from apps.documents.models import Document
 
 class DeposantSerializer(serializers.ModelSerializer):
     class Meta:
@@ -27,7 +28,7 @@ class BrevetSerializer(serializers.ModelSerializer):
     
     def get_inventeur(self, obj):
         try:
-            inventeurs = obj.demande.inventeurs.all()  # ← related_name="inventeurs"
+            inventeurs = obj.demande.inventeurs.all()  # related_name="inventeurs"
             return InventeurSerializer(inventeurs, many=True).data
         except:
             return []
@@ -62,14 +63,45 @@ class BrevetSerializer(serializers.ModelSerializer):
     
 class DemandeBrevetSerializer(serializers.ModelSerializer):
     num_brevet = serializers.SerializerMethodField()
+    createur_username = serializers.SerializerMethodField(read_only=True)
+    createur_id       = serializers.SerializerMethodField(read_only=True)
+    documents         = serializers.SerializerMethodField(read_only=True)
     
     def get_num_brevet(self, obj):
         try:
             return obj.id_brevet.num_brevet
         except:
             return None 
+        
+    def get_createur_username(self, obj):
+        return obj.id.username if obj.id else "—"
+
+    def get_createur_id(self, obj):
+        return obj.id.id if obj.id else None
+    
+    def get_documents(self, obj):
+        docs    = Document.objects.filter(id_demande=obj)
+        request = self.context.get('request')
+        result  = []
+        for doc in docs:
+            fichier_url = None
+            if doc.fichier:
+                fichier_url = (
+                    request.build_absolute_uri(doc.fichier.url)
+                    if request else doc.fichier.url
+                )
+            result.append({
+                "id_document":   doc.id_document,
+                "nom_document":  doc.nom_document,
+                "type_document": doc.type_document,
+                "date_ajout":    str(doc.date_ajout),
+                "fichier_url":   fichier_url,
+                "fichier_nom":   doc.fichier.name.split("/")[-1] if doc.fichier else None,
+            })
+            
     deposant = DeposantSerializer(source="deposant_set", read_only=True, many=True)
     inventeur = InventeurSerializer(source="inventeurs", read_only=True, many=True)
+    
     class Meta:
         model = DemandeBrevet
         fields = '__all__'

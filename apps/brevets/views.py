@@ -5,7 +5,6 @@ from rest_framework.response import Response
 
 from apps.notifications.models import Notifications
 from .models import Brevet, DemandeBrevet, Deposant, Inventeur
-from django.conf import settings
 from apps.users.models import Utilisateur
 from .serializers import (
     BrevetSerializer,
@@ -151,6 +150,7 @@ class BrevetViewSet(viewsets.ModelViewSet):
             user.is_staff
             or user.is_superuser
             or user.groups.filter(name="agent").exists()
+             or user.groups.filter(name="responsable").exists()
         )
 
     def create(self, request, *args, **kwargs):
@@ -202,3 +202,34 @@ class BrevetViewSet(viewsets.ModelViewSet):
             )
     except Exception:
         pass
+    
+    @action(detail=False, methods=['get'], url_path='demandes-disponibles')
+    def demandes_disponibles(self, request):
+        user = request.user
+
+        if (user.is_staff or user.is_superuser or
+                user.groups.filter(name="responsable").exists()):
+            # responsable/admin → toutes les demandes validées sans brevet
+            demandes = DemandeBrevet.objects.filter(
+               id_brevet__isnull=True,
+                statut='valider'
+            )
+        else:
+            # agent → uniquement SES demandes validées sans brevet
+            # id_id car Django génère ce nom pour une FK nommée "id"
+            demandes = DemandeBrevet.objects.filter(
+                brevet__isnull=True,
+                statut='valider',
+                id_id=user.id
+            )
+
+        data = [
+            {
+                "id_demande": d.id_demande,
+                "titre":      d.titre,
+                "num_depo":   d.num_depo,
+                "date_depo":  d.date_depo,
+            }
+            for d in demandes
+        ]
+        return Response(data)
