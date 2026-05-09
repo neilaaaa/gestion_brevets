@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import DemandeBrevet, Deposant, Inventeur, Brevet
 from apps.documents.serializers import DocumentSerializer
 from apps.documents.models import Document
+import datetime
 
 class DeposantSerializer(serializers.ModelSerializer):
     class Meta:
@@ -62,23 +63,62 @@ class BrevetSerializer(serializers.ModelSerializer):
         return attrs
     
 class DemandeBrevetSerializer(serializers.ModelSerializer):
-    num_brevet = serializers.SerializerMethodField()
     createur_username = serializers.SerializerMethodField(read_only=True)
     createur_id       = serializers.SerializerMethodField(read_only=True)
+    createur_groupe   = serializers.SerializerMethodField(read_only=True)
     documents         = serializers.SerializerMethodField(read_only=True)
-    
-    def get_num_brevet(self, obj):
-        try:
-            return obj.id_brevet.num_brevet
-        except:
-            return None 
-        
+    deposant          = serializers.SerializerMethodField(read_only=True)
+    inventeur         = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model  = DemandeBrevet
+        fields = [
+            'id_demande', 'titre', 'nature', 'num_depo', 'date_depo',
+            'pays_origine', 'numdemande_CA', 'date_CA', 'mandataire',
+            'date_pouvoir', 'prepose_reception', 'lieu_reception',
+            'date_reception', 'autre_info', 'statut', 'id',
+            'piece_copie_int', 'piece_memoire_nat', 'piece_memoire_fr',
+            'piece_memoire_fr_dup', 'piece_dessins_orig', 'piece_dessins_dup',
+            'piece_abrege', 'piece_pouvoir', 'piece_priorite',
+            'piece_cession', 'piece_titre',
+            'createur_username', 'createur_id', 'createur_groupe',
+            'documents', 'deposant', 'inventeur',
+        ]
+        extra_kwargs = {
+            'id':            {'read_only': True},
+            'pays_origine':  {'required': False, 'default': ''},
+            'numdemande_CA': {'required': False, 'default': 0},
+            'date_CA':       {'required': False},
+            'date_pouvoir':  {'required': False},
+            'mandataire':    {'required': False, 'default': ''},
+            'num_depo':      {'required': False, 'default': 0},
+            'date_depo':     {'required': False},
+        }
+
     def get_createur_username(self, obj):
         return obj.id.username if obj.id else "—"
 
     def get_createur_id(self, obj):
         return obj.id.id if obj.id else None
-    
+
+    def get_createur_groupe(self, obj):
+        if obj.id:
+            groups = list(obj.id.groups.values_list('name', flat=True))
+            if 'responsable' in groups:
+                return 'responsable'
+            if 'agent' in groups:
+                return 'agent'
+        return 'inconnu'
+
+    def get_deposant(self, obj):
+        deps = Deposant.objects.filter(id_demande=obj)
+        return DeposantSerializer(deps, many=True).data
+
+    def get_inventeur(self, obj):
+        invs = obj.inventeurs.all()
+        print(f"demande {obj.id_demande} - inventeurs: {invs}")  
+        return InventeurSerializer(invs, many=True).data
+
     def get_documents(self, obj):
         docs    = Document.objects.filter(id_demande=obj)
         request = self.context.get('request')
@@ -98,26 +138,13 @@ class DemandeBrevetSerializer(serializers.ModelSerializer):
                 "fichier_url":   fichier_url,
                 "fichier_nom":   doc.fichier.name.split("/")[-1] if doc.fichier else None,
             })
-            
-    deposant = DeposantSerializer(source="deposant_set", read_only=True, many=True)
-    inventeur = InventeurSerializer(source="inventeurs", read_only=True, many=True)
-    
-    class Meta:
-        model = DemandeBrevet
-        fields = '__all__'
-        extra_kwargs = {
-            'id': {'read_only': True},
-            'statut': {'read_only': True},
-        }
+        return result
 
-    def validate(self, attrs):
-        date_depo = attrs.get("date_depo")
-        date_reception = attrs.get("date_reception")
+    def validate(self, data):
+        today = datetime.date.today()
+        if not data.get('date_CA'):      data['date_CA']      = today
+        if not data.get('date_pouvoir'): data['date_pouvoir'] = today
+        if not data.get('date_depo'):    data['date_depo']    = today
+        return data
 
-        if date_depo and date_reception and date_reception < date_depo:
-            raise serializers.ValidationError(
-                "La date de reception ne peut pas etre anterieure a la date de depot."
-            )
-
-        return attrs
 

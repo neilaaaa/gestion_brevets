@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import Recours
 
 class RecoursSerializer(serializers.ModelSerializer):
-    brevet = serializers.SerializerMethodField()
+    brevet = serializers.SerializerMethodField(read_only=True)
     
     def get_brevet(self, obj):
         try:

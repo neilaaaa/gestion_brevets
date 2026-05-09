@@ -35,8 +35,8 @@ class RecoursViewSet(viewsets.ModelViewSet):
         if not (
             user.is_staff
             or user.is_superuser
-            or user.groups.filter(name="Responsable").exists()
-            or user.groups.filter(name="Directeur").exists()
+            or user.groups.filter(name="responsable").exists()
+            or user.groups.filter(name="directeur").exists()
         ):
             if id_brevet:
                 from apps.brevets.models import Brevet
@@ -47,7 +47,7 @@ class RecoursViewSet(viewsets.ModelViewSet):
 
                 if not allowed_brevet:
                     return Response(
-                        {"error": "Vous ne pouvez pas creer un recours sur un brevet hors de votre perimetre."},
+                        {"error": "Vous ne pouvez pas creer un recours sur ce brevet "},
                         status=status.HTTP_403_FORBIDDEN
                     )
 
@@ -62,7 +62,7 @@ class RecoursViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def traiter_recours(self, request, pk=None):
-        if not request.user.groups.filter(name="Responsable").exists():
+        if not request.user.groups.filter(name="responsable").exists():
             return Response(
                 {"error": "Vous n'avez pas la permission de traiter un recours."},
                 status=status.HTTP_403_FORBIDDEN

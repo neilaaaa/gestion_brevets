@@ -1,7 +1,11 @@
 from pathlib import Path
+from dotenv import load_dotenv
 import os
+from decouple import config
+GROQ_API_KEY = config('GROQ_API_KEY')
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / '.env')
 
 SECRET_KEY = 'django-insecure-u$#upa)*hm6um%sd$l6qu%gl5lkm9t1jwcgogo&(k_f=o07w$l'
 

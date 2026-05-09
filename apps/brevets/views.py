@@ -1,7 +1,9 @@
+from django.contrib.auth import get_user_model
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.exceptions import PermissionDenied
 
 from apps.notifications.models import Notifications
 from .models import Brevet, DemandeBrevet, Deposant, Inventeur
@@ -13,6 +15,13 @@ from .serializers import (
     InventeurSerializer,
 )
 
+User = get_user_model()
+
+def notifier_groupe(groupe_name, message):
+    """Envoie une notification à tous les users d'un groupe donné."""
+    users = User.objects.filter(groups__name=groupe_name)
+    for u in users:
+        Notifications.objects.create(id=u, message=message)
 
 def has_group(user, name):
     return user.groups.filter(name__iexact=name).exists()
@@ -38,11 +47,18 @@ class DemandeBrevetViewSet(viewsets.ModelViewSet):
         return DemandeBrevet.objects.filter(id=user)
 
     def perform_create(self, serializer):
-        demande = serializer.save(id=self.request.user)
-        Notifications.objects.create(
-            id=self.request.user,
-            message=f"Votre demande '{demande.titre}' a ete creee."
-        )
+      statut = 'valider' if self.request.user.groups.filter(name="responsable").exists() else 'non_valider'
+      demande = serializer.save(id=self.request.user, statut=statut)
+
+      Notifications.objects.create(
+       id = self.request.user,
+       message=f"Votre demande '{demande.titre}' a été créée avec succès."
+    )
+    
+      notifier_groupe(
+            "responsable",
+            f"Nouvelle demande soumise : '{demande.titre}' par {self.request.user.username}."
+        )    
 
     @action(detail=True, methods=['post'])
     def valider_demande(self, request, pk=None):
@@ -130,6 +146,7 @@ class BrevetViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        print(user)
 
         if user.is_staff or user.is_superuser:
             return Brevet.objects.all()
@@ -143,7 +160,7 @@ class BrevetViewSet(viewsets.ModelViewSet):
         if user.groups.filter(name="agent").exists():
             return Brevet.objects.all()
 
-        return Brevet.objects.filter(id_id=user)
+        return Brevet.objects.filter(user=user)
 
     def _can_manage_brevet(self, user):
         return (
@@ -171,15 +188,6 @@ class BrevetViewSet(viewsets.ModelViewSet):
 
         return super().update(request, *args, **kwargs)
 
-    def partial_update(self, request, *args, **kwargs):
-        if not self._can_manage_brevet(request.user):
-            return Response(
-                {"error": "Seul un agent peut modifier un brevet."},
-                status=status.HTTP_403_FORBIDDEN
-            )
-
-        return super().partial_update(request, *args, **kwargs)
-
     def destroy(self, request, *args, **kwargs):
         if not self._can_manage_brevet(request.user):
             return Response(
@@ -190,18 +198,12 @@ class BrevetViewSet(viewsets.ModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
     def perform_create(self, serializer):
-        brevet = serializer.save(id=self.request.user)
-    try:
-        user = serializer.save()
-        group = Group.objects.get(name="Agent")
-        user.groups.add(group)
-        if brevet.demande:
+        brevet = serializer.save(user=self.request.user)
+        if brevet.id_demande:
             Notifications.objects.create(
-                id=brevet.demande.id_demande,
-                message=f"Un brevet a ete ajoute manuellement pour votre demande '{brevet.id_demande.titre}'."
+                id=brevet.id_demande.id,
+                message=f"Un brevet a été créé pour votre demande '{brevet.id_demande.titre}'."
             )
-    except Exception:
-        pass
     
     @action(detail=False, methods=['get'], url_path='demandes-disponibles')
     def demandes_disponibles(self, request):
@@ -215,8 +217,6 @@ class BrevetViewSet(viewsets.ModelViewSet):
                 statut='valider'
             )
         else:
-            # agent → uniquement SES demandes validées sans brevet
-            # id_id car Django génère ce nom pour une FK nommée "id"
             demandes = DemandeBrevet.objects.filter(
                 brevet__isnull=True,
                 statut='valider',

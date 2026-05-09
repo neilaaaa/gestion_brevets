@@ -27,7 +27,7 @@ class DashboardStatsView(APIView):
             selected = request.query_params.get("selected", "")
 
             brevets   = Brevet.objects.all()        if is_admin else Brevet.objects.filter(id_id=user)
-            demandes  = DemandeBrevet.objects.all() if is_admin else DemandeBrevet.objects.filter(id_id=user)
+            demandes  = DemandeBrevet.objects.all() if is_admin else DemandeBrevet.objects.filter(createur=user)
             recours   = Recours.objects.all()       if is_admin else Recours.objects.filter(id_id=user)
             paiements = Paiement.objects.all()      if is_admin else Paiement.objects.filter(id_id=user)
          

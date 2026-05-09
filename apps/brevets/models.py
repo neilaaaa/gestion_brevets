@@ -42,8 +42,21 @@ class DemandeBrevet(models.Model):
     date_reception = models.DateField(null=True, blank=True)
     autre_info = models.TextField(blank=True)
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='non_valider')
+    
+    piece_copie_int      = models.BooleanField(default=False)
+    piece_memoire_nat    = models.BooleanField(default=False)
+    piece_memoire_fr     = models.BooleanField(default=False)
+    piece_memoire_fr_dup = models.BooleanField(default=False)
+    piece_dessins_orig   = models.BooleanField(default=False)
+    piece_dessins_dup    = models.BooleanField(default=False)
+    piece_abrege         = models.BooleanField(default=False)
+    piece_pouvoir        = models.BooleanField(default=False)
+    piece_priorite       = models.BooleanField(default=False)
+    piece_cession        = models.BooleanField(default=False)
+    piece_titre          = models.BooleanField(default=False)
 
-    id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, db_column='id', related_name='demandes')
+
+    id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, db_column='createur', related_name='demandes')
     id_brevet = models.OneToOneField(Brevet, on_delete=models.SET_NULL, null=True, blank=True, db_column='id_brevet',  related_name="demande")
 
     def __str__(self):

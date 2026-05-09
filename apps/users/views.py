@@ -10,7 +10,7 @@ from .serializers import UtilisateurSerializer
 
 class UtilisateurViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminUser]
-    queryset = Utilisateur.objects.all()
+    queryset = Utilisateur.objects.all().order_by('id')
     serializer_class = UtilisateurSerializer
 
 

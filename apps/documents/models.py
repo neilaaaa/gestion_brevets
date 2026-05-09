@@ -17,10 +17,10 @@ class Document(models.Model):
     nom_document = models.CharField(max_length=255)
     description = models.TextField(default="", blank=True)
     fichier = models.FileField(upload_to='documents/')
-    date_ajout = models.DateField(auto_now_add=True)
-    date_sortie_officielle = models.DateField(auto_now_add=True, null=True, blank=True)
+    date_ajout = models.DateField( null=True, blank=True)
+    date_sortie_officielle = models.DateField( null=True, blank=True)
 
-    type_document = models.CharField(  # ← plus besoin de ForeignKey
+    type_document = models.CharField( 
         max_length=50,
         choices=TYPE_CHOICES,
         default="brevet"

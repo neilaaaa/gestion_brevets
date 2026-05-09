@@ -5,6 +5,7 @@ from .models import Paiement
 class PaiementSerializer(serializers.ModelSerializer):
     brevet = serializers.SerializerMethodField()
 
+
     def get_brevet(self, obj):
         try:
             return{

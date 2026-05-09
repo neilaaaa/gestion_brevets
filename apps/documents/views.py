@@ -96,7 +96,36 @@ class DocumentViewSet(viewsets.ModelViewSet):
         if document.type_document == "paiement" and document.id_paiement:
              document.id_paiement.statut = "payer"
              document.id_paiement.save()
+             
+             
+    def perform_destroy(self, instance):
+        brevet    = instance.id_brevet
+        paiement  = instance.id_paiement
+        type_doc  = instance.type_document
 
+        # Supprimer le document
+        instance.delete()
+
+        # Type "brevet" supprimé → si plus aucun doc brevet sur ce brevet → "non_valider"
+        if type_doc == "brevet" and brevet:
+            reste = Document.objects.filter(
+                id_brevet=brevet,
+                type_document="brevet"
+            ).exists()
+            if not reste:
+                brevet.statut = "REFUSER"
+                brevet.save()
+
+        # Type "paiement" supprimé → si plus aucun doc paiement sur ce brevet → "non_paye"
+        if type_doc == "paiement" and brevet:
+            reste = Document.objects.filter(
+                id_brevet=brevet,
+                type_document="paiement"
+            ).exists()
+            if not reste and paiement:
+                paiement.statut = "non_paye"
+                paiement.save()
+                
     @action(detail=True, methods=['get'])
     def download(self, request, pk=None):
         document = self.get_object()
