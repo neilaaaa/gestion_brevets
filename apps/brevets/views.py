@@ -158,9 +158,9 @@ class BrevetViewSet(viewsets.ModelViewSet):
             return Brevet.objects.all()
         
         if user.groups.filter(name="agent").exists():
-            return Brevet.objects.all()
+            return Brevet.objects.filter(id=user)
 
-        return Brevet.objects.filter(user=user)
+        return Brevet.objects.filter(id=user)
 
     def _can_manage_brevet(self, user):
         return (
@@ -198,7 +198,7 @@ class BrevetViewSet(viewsets.ModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
     def perform_create(self, serializer):
-        brevet = serializer.save(user=self.request.user)
+        brevet = serializer.save(id=self.request.user)
         if brevet.id_demande:
             Notifications.objects.create(
                 id=brevet.id_demande.id,
@@ -213,7 +213,7 @@ class BrevetViewSet(viewsets.ModelViewSet):
                 user.groups.filter(name="responsable").exists()):
             # responsable/admin → toutes les demandes validées sans brevet
             demandes = DemandeBrevet.objects.filter(
-               id_brevet__isnull=True,
+                id_brevet__isnull=True,
                 statut='valider'
             )
         else:
