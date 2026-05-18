@@ -5,6 +5,12 @@ from .models import  Document
 
 class DocumentSerializer(serializers.ModelSerializer):
     brevet = serializers.SerializerMethodField()
+    date_sortie_officielle = serializers.DateField()
+    
+    date_sortie_officielle = serializers.DateField(
+    required=False,
+    allow_null=True
+)
     
     def get_brevet(self, obj):
         try:
@@ -28,6 +34,13 @@ class DocumentSerializer(serializers.ModelSerializer):
         return value
 
     def validate(self, attrs):
+        type_document = attrs.get("type_document")
+
+        if type_document == "brevet" and not attrs.get("date_sortie_officielle"):
+         raise serializers.ValidationError({
+            "date_sortie_officielle": "Ce champ est obligatoire pour un brevet."
+        })
+        
         id_demande = attrs.get("id_demande")
         id_brevet = attrs.get("id_brevet")
 

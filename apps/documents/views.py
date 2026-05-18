@@ -89,9 +89,9 @@ class DocumentViewSet(viewsets.ModelViewSet):
         document = serializer.save()
         if document.type_document == "brevet" and document.id_brevet:
             document.id_brevet.statut = "ACCEPTER"
-            if document. date_sortie_officielle: 
-             document.id_brevet.date_sortie = document. date_sortie_officielle
-            document.id_brevet.save()
+        if document. date_sortie_officielle: 
+            document.id_brevet.date_sortie = document. date_sortie_officielle
+        document.id_brevet.save()
             
         if document.type_document == "paiement" and document.id_paiement:
              document.id_paiement.statut = "payer"
@@ -103,10 +103,8 @@ class DocumentViewSet(viewsets.ModelViewSet):
         paiement  = instance.id_paiement
         type_doc  = instance.type_document
 
-        # Supprimer le document
         instance.delete()
 
-        # Type "brevet" supprimé → si plus aucun doc brevet sur ce brevet → "non_valider"
         if type_doc == "brevet" and brevet:
             reste = Document.objects.filter(
                 id_brevet=brevet,

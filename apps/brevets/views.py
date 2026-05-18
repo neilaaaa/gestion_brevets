@@ -145,22 +145,20 @@ class BrevetViewSet(viewsets.ModelViewSet):
 
 
     def get_queryset(self):
-        user = self.request.user
-        print(user)
+     user = self.request.user
+     print(f"user: {user.username}, groupes: {list(user.groups.values_list('name', flat=True))}")
+   
 
-        if user.is_staff or user.is_superuser:
-            return Brevet.objects.all()
+     if user.is_staff or user.is_superuser:
+        return Brevet.objects.all().order_by('-id_brevet')
 
-        if user.groups.filter(name="responsable").exists():
-            return Brevet.objects.all()
+     if user.groups.filter(name="responsable").exists():
+        return Brevet.objects.all().order_by('-id_brevet')
 
-        if user.groups.filter(name="directeur").exists():
-            return Brevet.objects.all()
-        
-        if user.groups.filter(name="agent").exists():
-            return Brevet.objects.all()
+     if user.groups.filter(name="directeur").exists():
+        return Brevet.objects.all().order_by('-id_brevet')
 
-        return Brevet.objects.filter(user=user)
+     return Brevet.objects.filter(user=user)
 
     def _can_manage_brevet(self, user):
         return (
@@ -198,7 +196,7 @@ class BrevetViewSet(viewsets.ModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
     def perform_create(self, serializer):
-        brevet = serializer.save(user=self.request.user)
+        brevet = serializer.save(id=self.request.user)
         if brevet.id_demande:
             Notifications.objects.create(
                 id=brevet.id_demande.id,
