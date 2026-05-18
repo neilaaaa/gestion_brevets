@@ -20,6 +20,22 @@ class BrevetSerializer(serializers.ModelSerializer):
     inventeur= serializers.SerializerMethodField()
     deposant =serializers.SerializerMethodField()
     titre =serializers.SerializerMethodField()
+    num_depo =serializers.SerializerMethodField()
+    date_depo =serializers.SerializerMethodField()
+    
+    def get_num_depo(self, obj):
+        try:
+            return obj.demande.num_depo
+        except Exception as e:
+            print("ERREUR numero de depot:", e)
+            return None
+    
+    def get_date_depo(self, obj):
+        try:
+            return obj.demande.date_depo
+        except Exception as e:
+            print("ERREUR date de depot:", e)
+            return None
     
     def get_titre_demande_liee(self, obj):
         try:
