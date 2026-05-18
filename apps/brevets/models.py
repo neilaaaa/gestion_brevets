@@ -10,12 +10,12 @@ class Brevet(models.Model):
     ]
 
     id_brevet = models.AutoField(primary_key=True)
-    num_brevet = models.IntegerField()
-    titre = models.CharField(max_length=1000)
-    num_depo = models.IntegerField()
-    date_depo = models.DateField()
+    num_brevet = models.IntegerField(blank=True)
+    titre = models.CharField(max_length=1000,blank=True)
+    num_depo = models.IntegerField(blank=True, null=True)
+    date_depo = models.DateField(blank=True, null=True)
     date_sortie = models.DateField(null=True, blank=True)
-    titulaire = models.CharField(max_length=255)
+    titulaire = models.CharField(max_length=255, blank=True)
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='EN_ATTENTE')
 
     id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, db_column='id', related_name='brevets_crees')
@@ -37,7 +37,7 @@ class DemandeBrevet(models.Model):
     numdemande_CA = models.IntegerField()
     date_CA = models.DateField()
     mandataire = models.CharField(max_length=255)
-    date_pouvoir = models.DateField()
+    date_pouvoir = models.DateField(null=True, blank=True)
     prepose_reception = models.CharField(max_length=255, blank=True, default="")
     lieu_reception = models.CharField(max_length=255, blank=True, default="")
     date_reception = models.DateField(null=True, blank=True)

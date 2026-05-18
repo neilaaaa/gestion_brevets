@@ -113,7 +113,7 @@ class DemandeBrevetSerializer(serializers.ModelSerializer):
             'id':            {'read_only': True},
             'pays_origine':  {'required': False, 'default': ''},
             'numdemande_CA': {'required': False, 'default': 0},
-            'date_CA':       {'required': False},
+            'date_CA':       {'required': False, 'allow_null': True},
             'date_pouvoir':  {'required': False},
             'mandataire':    {'required': False, 'default': ''},
             'num_depo':      {'required': False, 'default': 0},
