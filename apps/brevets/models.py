@@ -28,6 +28,7 @@ class DemandeBrevet(models.Model):
     STATUT_CHOICES = [('valider', 'valider'), ('non_valider', 'non_valider')]
 
     id_demande = models.AutoField(primary_key=True)
+    titre_dem = models.TextField(null=True, default="")
     titre = models.TextField()
     nature = models.CharField(max_length=100)
     num_depo = models.IntegerField()

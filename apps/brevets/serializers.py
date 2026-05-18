@@ -19,8 +19,16 @@ class BrevetSerializer(serializers.ModelSerializer):
     titre_demande_liee = serializers.SerializerMethodField() #pour afficher le num_brevet du brevet associé à la demande c'est specifique donc on utilise SerializerMethodField
     inventeur= serializers.SerializerMethodField()
     deposant =serializers.SerializerMethodField()
+    titre =serializers.SerializerMethodField()
     
     def get_titre_demande_liee(self, obj):
+        try:
+            return obj.demande.titre_dem
+        except Exception as e:
+            print("ERREUR get_titre_demande_liee:", e)
+            return None
+    
+    def get_titre(self, obj):
         try:
             return obj.demande.titre
         except Exception as e:
@@ -69,6 +77,7 @@ class DemandeBrevetSerializer(serializers.ModelSerializer):
     documents         = serializers.SerializerMethodField(read_only=True)
     deposant          = serializers.SerializerMethodField(read_only=True)
     inventeur         = serializers.SerializerMethodField(read_only=True)
+    
 
     class Meta:
         model  = DemandeBrevet
@@ -82,7 +91,7 @@ class DemandeBrevetSerializer(serializers.ModelSerializer):
             'piece_abrege', 'piece_pouvoir', 'piece_priorite',
             'piece_cession', 'piece_titre',
             'createur_username', 'createur_id', 'createur_groupe',
-            'documents', 'deposant', 'inventeur',
+            'documents', 'deposant', 'inventeur', 'id_brevet', 'titre_dem'
         ]
         extra_kwargs = {
             'id':            {'read_only': True},

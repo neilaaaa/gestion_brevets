@@ -52,13 +52,19 @@ class DemandeBrevetViewSet(viewsets.ModelViewSet):
 
       Notifications.objects.create(
        id = self.request.user,
-       message=f"Votre demande '{demande.titre}' a été créée avec succès."
+       message=f"Votre demande '{demande.titre_dem}' a été créée avec succès."
     )
     
       notifier_groupe(
             "responsable",
             f"Nouvelle demande soumise : '{demande.titre}' par {self.request.user.username}."
-        )    
+        ) 
+      
+      if demande.id_brevet:
+            Notifications.objects.create(
+                id=demande.id_brevet.id,
+                message=f"Un brevet a été créé pour votre demande '{demande.id_brevet.titre}'."
+            )   
 
     @action(detail=True, methods=['post'])
     def valider_demande(self, request, pk=None):
@@ -147,7 +153,6 @@ class BrevetViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
      user = self.request.user
      print(f"user: {user.username}, groupes: {list(user.groups.values_list('name', flat=True))}")
-   
 
      if user.is_staff or user.is_superuser:
         return Brevet.objects.all().order_by('-id_brevet')
@@ -158,8 +163,9 @@ class BrevetViewSet(viewsets.ModelViewSet):
      if user.groups.filter(name="directeur").exists():
         return Brevet.objects.all().order_by('-id_brevet')
 
-     return Brevet.objects.filter(user=user)
-
+     print("ici agent lis la ligne")
+     return Brevet.objects.filter(id=user).order_by('-id_brevet')
+ 
     def _can_manage_brevet(self, user):
         return (
             user.is_staff
@@ -196,20 +202,15 @@ class BrevetViewSet(viewsets.ModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
     def perform_create(self, serializer):
-        brevet = serializer.save(id=self.request.user)
-        if brevet.id_demande:
-            Notifications.objects.create(
-                id=brevet.id_demande.id,
-                message=f"Un brevet a été créé pour votre demande '{brevet.id_demande.titre}'."
-            )
+        serializer.save(id=self.request.user)
+        
     
     @action(detail=False, methods=['get'], url_path='demandes-disponibles')
     def demandes_disponibles(self, request):
         user = request.user
 
         if (user.is_staff or user.is_superuser or
-                user.groups.filter(name="responsable").exists()):
-            # responsable/admin → toutes les demandes validées sans brevet
+                user.groups.filter(name="responsable").exists() or user.groups.filter(name="agent").exists()):
             demandes = DemandeBrevet.objects.filter(
                id_brevet__isnull=True,
                 statut='valider'
@@ -218,16 +219,82 @@ class BrevetViewSet(viewsets.ModelViewSet):
             demandes = DemandeBrevet.objects.filter(
                 brevet__isnull=True,
                 statut='valider',
-                id_id=user.id
+                id=user
             )
 
         data = [
             {
                 "id_demande": d.id_demande,
-                "titre":      d.titre,
+                "titre":      d.titre_dem,
                 "num_depo":   d.num_depo,
                 "date_depo":  d.date_depo,
             }
             for d in demandes
         ]
         return Response(data)
+    
+    @action(detail=True, methods=['patch'], url_path='lier-demande')
+    def lier_demande(self, request, pk=None):
+        if not self._can_manage_brevet(request.user):
+            return Response(
+                {"error": "Permission insuffisante."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        brevet = self.get_object()
+        id_demande = request.data.get('id_demande')
+
+        if not id_demande:
+            return Response(
+                {"error": "id_demande est requis."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            demande = DemandeBrevet.objects.get(id_demande=id_demande)
+        except DemandeBrevet.DoesNotExist:
+            return Response(
+                {"error": "Demande introuvable."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Vérifications métier
+        if demande.id_brevet is not None and demande.id_brevet != brevet:
+            return Response(
+                {"error": "Cette demande est déjà liée à un autre brevet."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if DemandeBrevet.objects.filter(id_brevet=brevet).exclude(id_demande=id_demande).exists():
+            return Response(
+                {"error": "Ce brevet est déjà lié à une autre demande."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Liaison : on met à jour id_brevet sur la DemandeBrevet
+        demande.id_brevet = brevet
+        demande.save()
+
+        return Response(
+            {
+                "message": "Demande liée avec succès.",
+                "id_demande": demande.id_demande,
+                "titre_demande": demande.titre,
+                "id_brevet": brevet.id_brevet,
+            },
+            status=status.HTTP_200_OK
+        )
+        
+    @action(detail=False, methods=['get'], url_path='brevets-disponibles')
+    def brevets_disponibles(self, request):
+    # brevets qui n'ont pas encore de demande liée
+      brevets = Brevet.objects.filter(demande__isnull=True).order_by('-id_brevet')
+      data = [
+        {
+            "id_brevet": b.id_brevet,
+            "num_brevet": b.num_brevet,
+            "titre": b.titre,
+        }
+        for b in brevets
+    ]
+      return Response(data)

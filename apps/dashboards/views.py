@@ -26,10 +26,10 @@ class DashboardStatsView(APIView):
             mode     = request.query_params.get("mode", "")
             selected = request.query_params.get("selected", "")
 
-            brevets   = Brevet.objects.all()        if is_admin else Brevet.objects.filter(id_id=user)
-            demandes  = DemandeBrevet.objects.all() if is_admin else DemandeBrevet.objects.filter(createur=user)
-            recours   = Recours.objects.all()       if is_admin else Recours.objects.filter(id_id=user)
-            paiements = Paiement.objects.all()      if is_admin else Paiement.objects.filter(id_id=user)
+            brevets   = Brevet.objects.all()        if is_admin else Brevet.objects.filter(id=user)
+            demandes  = DemandeBrevet.objects.all() if is_admin else DemandeBrevet.objects.filter(id=user)
+            recours   = Recours.objects.all()       if is_admin else Recours.objects.filter(id=user)
+            paiements = Paiement.objects.all()      if is_admin else Paiement.objects.filter(id=user)
          
             brevets_f   = self._filter_date(brevets,   "date_depo",     mode, selected)
             paiements_f = self._filter_date(paiements, "date_paiement", mode, selected)
