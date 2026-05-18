@@ -8,8 +8,8 @@ class Paiement(models.Model):
     ]
 
     id_paiement = models.AutoField(primary_key=True)
-    date_paiement = models.DateField()
-    montant_total = models.FloatField()
+    date_paiement = models.DateField(blank=True, null=True)
+    montant_total = models.FloatField(blank=True, null=True)
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='non_payer')
 
 

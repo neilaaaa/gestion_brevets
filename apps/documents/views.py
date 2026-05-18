@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .models import Document
+from apps.paiements.models import  Paiement
 from .serializers import DocumentSerializer
 
 
@@ -67,8 +68,36 @@ class DocumentViewSet(viewsets.ModelViewSet):
         return super().create(request, *args, **kwargs)
 
     def perform_create(self, serializer):
-        serializer.save(id=self.request.user)
+        document = serializer.save(id=self.request.user)
         print("DATA reçue:", self.request.data)
+        
+        if document.type_document == "brevet" and document.id_brevet:
+            document.id_brevet.statut = "ACCEPTER"
+            if document. date_sortie_officielle: 
+             document.id_brevet.date_sortie = document. date_sortie_officielle
+            document.id_brevet.save()
+            
+        if document.type_document == "paiement":
+         paiement_existant = Paiement.objects.filter(id_brevet=document.id_brevet).first()
+         if paiement_existant:
+            paiement_existant.date_paiement = document.date_paiement
+            paiement_existant.montant_total = document.montant_total
+            paiement_existant.statut = "payer"
+            paiement_existant.save()
+            document.id_paiement = paiement_existant
+         else:
+            paiement = Paiement.objects.create(
+                id_brevet=document.id_brevet,
+                date_paiement=document.date_paiement,
+                montant_total=document.montant_total,
+                statut="payer",
+                id=self.request.user
+            )
+            document.id_paiement = paiement
+        
+         document.save()
+            
+    def perform_update(self, serializer):
         document = serializer.save()
         
         if document.type_document == "brevet" and document.id_brevet:
@@ -77,25 +106,13 @@ class DocumentViewSet(viewsets.ModelViewSet):
              document.id_brevet.date_sortie = document. date_sortie_officielle
             document.id_brevet.save()
             
-        if document.type_document == "paiement" and document.id_brevet:
-            try:
-             paiement = document.id_brevet.paiement
-             paiement.statut = "payer"
-             paiement.save()
-            except:
-                pass
-            
-    def perform_update(self, serializer):
-        document = serializer.save()
-        if document.type_document == "brevet" and document.id_brevet:
-            document.id_brevet.statut = "ACCEPTER"
-        if document. date_sortie_officielle: 
-            document.id_brevet.date_sortie = document. date_sortie_officielle
-        document.id_brevet.save()
-            
         if document.type_document == "paiement" and document.id_paiement:
-             document.id_paiement.statut = "payer"
-             document.id_paiement.save()
+         paiement = document.id_paiement
+         paiement.date_paiement = document.date_paiement
+         paiement.montant_total = document.montant_total
+         if document.id_brevet:
+            paiement.id_brevet = document.id_brevet
+         paiement.save()
              
              
     def perform_destroy(self, instance):

@@ -19,6 +19,8 @@ class Document(models.Model):
     fichier = models.FileField(upload_to='documents/')
     date_ajout = models.DateField( null=True, blank=True)
     date_sortie_officielle = models.DateField( null=True, blank=True)
+    date_paiement = models.DateField(null=True, blank=True)
+    montant_total = models.FloatField(null=True, blank=True)
 
     type_document = models.CharField( 
         max_length=50,

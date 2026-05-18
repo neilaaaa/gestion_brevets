@@ -41,6 +41,16 @@ class DocumentSerializer(serializers.ModelSerializer):
             "date_sortie_officielle": "Ce champ est obligatoire pour un brevet."
         })
         
+        if type_document == "paiement" and not attrs.get("date_paiement",) :
+         raise serializers.ValidationError({
+            "montant_total": "Ce champ est obligatoire pour un paiement."
+        })
+         
+        if type_document == "paiement" and not attrs.get("montant_total",) :
+         raise serializers.ValidationError({
+            "date_paiement": "Ce champ est obligatoire pour un paiement."
+        })
+          
         id_demande = attrs.get("id_demande")
         id_brevet = attrs.get("id_brevet")
 
