@@ -13,17 +13,18 @@ class DocumentSerializer(serializers.ModelSerializer):
 )
     
     def get_brevet(self, obj):
-        try:
-            brevet = obj.id_brevet
-            if not brevet:
-                return None
-            titre_invention = brevet.demande.titre if hasattr(brevet, 'demande') else brevet.titre
-            return{
-                "titre": obj.titre_invention,
-                "num_brevet": obj.id_brevet.num_brevet
-            }
-        except:
+        brevet = obj.id_brevet
+        if not brevet:
             return None
+        try:
+            titre = brevet.demande.titre
+        except:
+            titre = brevet.titre
+        titre = brevet.titre
+        return {
+         "titre": titre,
+         "num_brevet": brevet.num_brevet
+    }
         
     class Meta:
         model = Document

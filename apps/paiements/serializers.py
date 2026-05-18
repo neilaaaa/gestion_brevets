@@ -29,9 +29,4 @@ class PaiementSerializer(serializers.ModelSerializer):
             "id": {"read_only": True}
         }
 
-    def validate_montant_total(self, value):
-        if value <= 0:
-            raise serializers.ValidationError(
-                "Le montant total doit etre strictement positif."
-            )
-        return value
+   
