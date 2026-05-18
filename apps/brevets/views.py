@@ -212,7 +212,7 @@ class BrevetViewSet(viewsets.ModelViewSet):
         if (user.is_staff or user.is_superuser or
                 user.groups.filter(name="responsable").exists() or user.groups.filter(name="agent").exists()):
             demandes = DemandeBrevet.objects.filter(
-               id_brevet__isnull=True,
+                id_brevet__isnull=True,
                 statut='valider'
             )
         else:
