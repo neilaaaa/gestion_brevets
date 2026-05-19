@@ -16,6 +16,10 @@ class DocumentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        brevet_id = self.request.query_params.get('brevet')
+        
+        if brevet_id:
+            return Document.objects.filter(id_brevet=brevet_id)
 
         if user.is_staff or user.is_superuser:
             return Document.objects.all()

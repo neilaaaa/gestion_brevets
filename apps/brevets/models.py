@@ -29,7 +29,7 @@ class DemandeBrevet(models.Model):
 
     id_demande = models.AutoField(primary_key=True)
     titre_dem = models.TextField(null=True, default="")
-    titre = models.TextField()
+    titre = models.TextField(null=True, blank=True)
     nature = models.CharField(max_length=100)
     num_depo = models.IntegerField()
     date_depo = models.DateField()
