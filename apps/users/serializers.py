@@ -1,4 +1,5 @@
 from django.contrib.auth.models import Group
+from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from .models import Utilisateur
 
@@ -49,6 +50,7 @@ class UtilisateurSerializer(serializers.ModelSerializer):
 
         if password:
             user.set_password(password)
+
             user.save()
 
         if groups:
@@ -83,4 +85,12 @@ class UtilisateurSerializer(serializers.ModelSerializer):
         if queryset.exists():
             raise serializers.ValidationError("Ce nom d'utilisateur existe deja.")
 
+        return value
+
+    def validate_password(self, value):
+        user = self.instance or Utilisateur(
+            username=self.initial_data.get('username', ''),
+            email=self.initial_data.get('email', ''),
+        )
+        validate_password(value, user=user)
         return value
