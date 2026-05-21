@@ -10,9 +10,9 @@ class Brevet(models.Model):
     ]
 
     id_brevet = models.AutoField(primary_key=True)
-    num_brevet = models.IntegerField(blank=True)
+    num_brevet = models.IntegerField(blank=True, unique=True, null=True)
     titre = models.CharField(max_length=1000,blank=True)
-    num_depo = models.IntegerField(blank=True, null=True)
+    num_depo = models.IntegerField(null=True, blank=True, unique=True)
     date_depo = models.DateField(blank=True, null=True)
     date_sortie = models.DateField(null=True, blank=True)
     titulaire = models.CharField(max_length=255, blank=True)

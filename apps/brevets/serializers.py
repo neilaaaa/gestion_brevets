@@ -118,6 +118,7 @@ class DemandeBrevetSerializer(serializers.ModelSerializer):
             'mandataire':    {'required': False, 'default': ''},
             'num_depo':      {'required': False, 'default': 0},
             'date_depo':     {'required': False},
+            'num_brevet': {'required': False, 'allow_null': True},
         }
 
     def get_createur_username(self, obj):

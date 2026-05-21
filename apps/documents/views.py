@@ -86,7 +86,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
          if paiement_existant:
             paiement_existant.date_paiement = document.date_paiement
             paiement_existant.montant_total = document.montant_total
-            paiement_existant.statut = "payer"
+            paiement_existant.statut = "payé"
             paiement_existant.save()
             document.id_paiement = paiement_existant
          else:
@@ -94,7 +94,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
                 id_brevet=document.id_brevet,
                 date_paiement=document.date_paiement,
                 montant_total=document.montant_total,
-                statut="payer",
+                statut="payé",
                 id=self.request.user
             )
             document.id_paiement = paiement

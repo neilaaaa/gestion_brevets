@@ -48,7 +48,20 @@ class DemandeBrevetViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
       statut = 'valider' if self.request.user.groups.filter(name="responsable").exists() else 'non_valider'
-      demande = serializer.save(id=self.request.user, statut=statut)
+      
+      user = self.request.user
+      demande = serializer.save(id=user, statut=statut)
+      
+      brevet = Brevet.objects.create(
+        titre = demande.titre,
+        num_depo = demande.num_depo,
+        date_depo = demande.date_depo, 
+        id=user,
+        num_brevet = None,
+      )
+      
+      demande.id_brevet = brevet
+      demande.save ()
 
       Notifications.objects.create(
        id = self.request.user,
@@ -60,11 +73,10 @@ class DemandeBrevetViewSet(viewsets.ModelViewSet):
             f"Nouvelle demande soumise : '{demande.titre}' par {self.request.user.username}."
         ) 
       
-      if demande.id_brevet:
-            Notifications.objects.create(
-                id=demande.id_brevet.id,
-                message=f"Un brevet a été créé pour votre demande '{demande.id_brevet.titre}'."
-            )   
+      Notifications.objects.create(
+        id=self.request.user,
+        message=f"Un brevet a été créé pour la demande '{demande.titre}'."
+     )   
 
     @action(detail=True, methods=['post'])
     def valider_demande(self, request, pk=None):
@@ -294,7 +306,7 @@ class BrevetViewSet(viewsets.ModelViewSet):
             user.groups.filter(name__in=["responsable", "directeur"]).exists()):
         queryset = queryset.filter(id=user)
     
-        data = [
+      data = [
         {
             "id_brevet": b.id_brevet,
             "num_brevet": b.num_brevet,
