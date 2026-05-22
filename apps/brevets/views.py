@@ -299,19 +299,22 @@ class BrevetViewSet(viewsets.ModelViewSet):
         
     @action(detail=False, methods=['get'], url_path='brevets-disponibles')
     def brevets_disponibles(self, request):
-      user = request.user
-      
-      queryset = Brevet.objects.filter(demande__isnull=True)
-      if not (user.is_staff or user.is_superuser or 
-            user.groups.filter(name__in=["responsable", "directeur"]).exists()):
-        queryset = queryset.filter(id=user)
-    
-      data = [
-        {
-            "id_brevet": b.id_brevet,
-            "num_brevet": b.num_brevet,
-            "titre": b.titre,
-        }
-        for b in queryset.order_by('-id_brevet')
-       ]
-      return Response(data)
+        user = request.user
+
+        queryset = Brevet.objects.filter(demande__isnull=True)
+        if not (
+            user.is_staff
+            or user.is_superuser
+            or user.groups.filter(name__in=["responsable", "directeur"]).exists()
+        ):
+            queryset = queryset.filter(id=user)
+
+        data = [
+            {
+                "id_brevet": b.id_brevet,
+                "num_brevet": b.num_brevet,
+                "titre": b.titre,
+            }
+            for b in queryset.order_by('-id_brevet')
+        ]
+        return Response(data)
