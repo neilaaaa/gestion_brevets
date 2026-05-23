@@ -57,4 +57,4 @@ class Document(models.Model):
             )
 
     def __str__(self):
-        return self.nom_document
+        return self.nom_document 

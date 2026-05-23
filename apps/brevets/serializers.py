@@ -22,6 +22,24 @@ class BrevetSerializer(serializers.ModelSerializer):
     titre =serializers.SerializerMethodField()
     num_depo =serializers.SerializerMethodField()
     date_depo =serializers.SerializerMethodField()
+    createur_username = serializers.SerializerMethodField(read_only=True)
+    createur_id       = serializers.SerializerMethodField(read_only=True)
+    createur_groupe   = serializers.SerializerMethodField(read_only=True)
+    
+    def get_createur_username(self, obj):
+        return obj.id.username if obj.id else "—"
+
+    def get_createur_id(self, obj):
+        return obj.id.id if obj.id else None
+
+    def get_createur_groupe(self, obj):
+        if obj.id:
+            groups = list(obj.id.groups.values_list('name', flat=True))
+            if 'responsable' in groups:
+                return 'responsable'
+            if 'agent' in groups:
+                return 'agent'
+        return 'inconnu'
     
     def get_num_depo(self, obj):
         try:
